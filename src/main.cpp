@@ -1,11 +1,19 @@
 #include <Arduino.h>
 
 #include "init.h"
-void setup() {
+void setup()
+{
   // put your setup code here, to run once:
-  initialization_report(F("setup"));
 }
 
-void loop() {
+void loop()
+{
+
+  task 
   // put your main code here, to run repeatedly:
+if task.execute() return
+
+
+
 }
+

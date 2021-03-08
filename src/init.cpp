@@ -1,25 +1,37 @@
 #include "init.h"
 #include "LittleFS.h"
 
+#include "buffers.h"
+
 void initialization_report(const __FlashStringHelper *msg)
-{ // call this function from class constructors,
-  // and other initializers
-  // to see when they execute
+{
+
   static bool init_complete = false;
   if (!init_complete)
   {
     Serial.begin(DEFAULT_BAUD);
+
     if (LittleFS.begin())
     {
-      Serial.println(F("LittleFS initialized"));
-      File f = LittleFS.open("/tesp.txt", "r");
-      String read_ = f.readString();
-      Serial.println(read_);
+      File f = LittleFS.open("/banner.txt", "r");
+      if (!f)
+      {
+        Serial.println(F("banner.txt file open failed"));
+      }
+      else
+      {
+        int n = 0;
+        do
+        {
+          n = f.readBytes(tmp.buf(), tmp.len);
+          Serial.write(tmp.buf(), n);
+        } while (n == tmp.len);
+        f.close();
+        init_complete = true;
+      }
     }
-
     else
       Serial.println(F("LittleFS failed"));
-    init_complete = true;
   }
   Serial.println(msg);
 }
