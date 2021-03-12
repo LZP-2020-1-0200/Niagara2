@@ -1,12 +1,11 @@
 #include "ngWiFi.h"
-#include "init.h"
+
 #include <ESP8266WiFi.h>
 
-NG_WiFi::NG_WiFi(/* args */) : NG_Task(0, 1000000)
+NG_WiFi::NG_WiFi(/* args */) // : NG_Task(0, 1000000)
 {
-   // initialization_report(F("initializing NG_Task"));
-   //  WiFi.begin("Optika", "slepens123");
-
+    // Serial.println(F("initializing NG_WiFi"));
+    //  WiFi.begin("Optika", "slepens123");
 }
 
 NG_WiFi::~NG_WiFi()
@@ -15,11 +14,12 @@ NG_WiFi::~NG_WiFi()
 
 int NG_WiFi::exec(const uint32 &new_u)
 {
-    int upd = NG_Task::exec(new_u);
+    //   int upd = NG_Task::exec(new_u);
 
-    if (upd)
-    {
-    }
-    return upd;
+    //    if (upd)
+    //    {
+    //    }
+    //    return upd;
+    return 0;
 }
 NG_WiFi ng_WiFi;

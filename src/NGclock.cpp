@@ -1,39 +1,39 @@
 #include "NGclock.h"
-#include "init.h"
+#include <time.h>
+#include <string.h>
 
-NGclock::NGclock(/* args */) : NG_Task(0, 1000000)
+NGclock::NGclock()
 {
-    initialization_report(F("initializing NGclock"));
-    uptime_f = 0;
-    sync_time_s_f = 0;
-    sync_usec_f = 0;
+    uptime_f = 0;      //system uptime in s
+    old_usec = 0;      // for counting uptime
+    sync_time_s_f = 0; //epoch time
+    sync_usec_f = 0;   //usec@epoch update
     setTZ("EET-2EEST,M3.5.0/3,M10.5.0/4");
 }
 
-int NGclock::delta_t()
-{
-
-    return 0;
-}
 NGclock::~NGclock()
 {
-}
-int NGclock::exec(const uint32 &new_u)
-{
-    int upd = NG_Task::exec(new_u);
-    if (upd)
-        uptime_f++;
-
-    return upd;
 }
 
 int NGclock::sync(const uint32 &new_u, const time_t &new_s)
 {
-    if (sync_time_s_f == new_s)
-        return 0;
-    sync_time_s_f = new_s;
-    sync_usec_f = new_u;
-    return 1;
-}
+    int ret_val = 0;
+    if (sync_time_s_f != new_s)
+    {
+        sync_time_s_f = new_s;
+        sync_usec_f = new_u;
+        ret_val ^= CLK_SECOND;
+        strlcpy(local_time_f, ctime(&sync_time_s_f), local_time_len);
+    }
 
+    uint32 dt = new_u - old_usec;
+    if (dt >= one_million)
+    {
+        old_usec += one_million;
+        uptime_f++;
+        ret_val ^= CLK_UPTIME;
+    }
+
+    return ret_val;
+}
 NGclock ngclk;

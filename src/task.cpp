@@ -1,6 +1,4 @@
-#include "task.h"
-#include "init.h"
-
+/*
 NG_Task::NG_Task(const uint32 &start_usec, const uint32 period_usec) : start_delay_usec(start_usec)
 {
 
@@ -19,7 +17,7 @@ int NG_Task::exec(const uint32 &new_u)
     if (start_delay_usec > new_u)
         return 0;
 
-    uint32 dt = new_u - usec_f;
+    const uint32 dt = new_u - usec_f;
 
     if (dt >= usec_period_f)
     {
@@ -30,3 +28,4 @@ int NG_Task::exec(const uint32 &new_u)
     }
     return 0;
 }
+*/
