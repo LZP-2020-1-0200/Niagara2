@@ -1,0 +1,59 @@
+{
+    "comments": [
+        "run gen_cpp_json.cmd script to generate new unique values."
+    ],
+    "header_guard": "NIAGARA2_SETTINGS_GENERATED_H",
+    "json_only": [
+        {
+            "json_key": "stage",
+            "value": "testing"
+        }
+    ],
+    "output_cpp_file_name": "src\\Niagara2_generated.cpp",
+    "output_include_file_name": "include\\Niagara2_generated.h",
+    "output_json_file_name": "Niagara2_ID.json",
+    "random": {
+        "alphanumeric": [
+            {
+                "cpp_var_name": "NG_secret1",
+                "cpp_var_type": "const char *",
+                "json_key": "secret1",
+                "length": 20,
+                "length_define_name": "NG_SECRET1_LEN"
+            }
+        ],
+        "binary": [
+            {
+                "cpp_var_name": "NG_XOR_Mask",
+                "cpp_var_type": "const unsigned char",
+                "json_key": "NG_XOR_Mask",
+                "length": 64,
+                "length_define_name": "NG_XOR_MASK_LEN"
+            }
+        ],
+        "uuid": [
+            {
+                "cpp_var_name": "NG_uuid",
+                "cpp_var_type": "const char *",
+                "json_key": "NG_uuid"
+            }
+        ]
+    },
+    "static": [
+        {
+            "cpp_var_name": "NG_model",
+            "cpp_var_type": "const char *",
+            "json_key": "model",
+            "length_define_name": "NG_MODEL_LEN",
+            "value": "Niagara"
+        },
+        {
+            "cpp_var_name": "NG_version",
+            "cpp_var_type": "const char *",
+            "json_key": "version",
+            "length_define_name": "NG_VERSION_LEN",
+            "value": "0.5"
+        }
+    ],
+    "uuid_length_define_name": "NG_UUID_LEN"
+}
