@@ -8,7 +8,7 @@
 #include "settings.h"
 
 #include <WiFiUdp.h>
-#include <NTPClient.h>
+//#include <NTPClient.h>
 #include <ESP8266WiFi.h>
 #include "ngWiFi.h"
 #include "NG_WebServer.h"
