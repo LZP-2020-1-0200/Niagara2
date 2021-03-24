@@ -11,23 +11,11 @@ class Command
 private:
     /* data */
 public:
-    Command(/* args */);
-    ~Command();
-        const char *cmd;
+    Command(const char *, void (*)(const char *));
+    ~Command(){};
+    const char *cmd;
     const size_t cmd_len;
     void (*func)(const char *);
-
 };
-
-Command::Command(/* args */)
-{
-}
-
-Command::~Command()
-{
-}
-
-
-
 
 #endif /* NIAGARA2_TASK_H */

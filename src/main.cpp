@@ -12,6 +12,7 @@
 #include <ESP8266WiFi.h>
 #include "ngWiFi.h"
 #include "NG_WebServer.h"
+#include "task.h"
 
 void setup()
 {
@@ -36,6 +37,14 @@ void loop()
 
   if (ng_WiFi.exec(new_usec))
     return;
+
+  if (Serial.available())
+  {
+    task_addChar(Serial.read());
+    return;
+  }
+
+
   if (ng_WiFi.got_ip())
     server.handleClient();
   // put your main code here, to run repeatedly://

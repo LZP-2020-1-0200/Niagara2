@@ -1,61 +1,44 @@
 #include "task.h"
 #include "Niagara2_generated.h"
 
-
-
-
-typedef struct
+Command::Command(const char *cmd_str, void (*ptr_func)(const char *)) //
+    : cmd(cmd_str),
+      cmd_len(strlen_P(cmd_str)),
+      func(ptr_func)
 {
-    const char *cmd;
-    const size_t cmd_len;
-    void (*func)(const char *);
-} cmd_t;
-
-void ERROR_func(const char *args)
-{
-    Serial.printf_P(PSTR("ERROR: UNKNOWN COMMAND %s\n"), args);
 }
 
-static const char pstr_IDN[] PROGMEM = "*IDN?";
-void IDN_func(const char *args)
-{
-    Serial.printf_P(PSTR("uuid = %s\n"), NG_uuid);
-}
-static const char pstr_HELP[] PROGMEM = "HELP";
-void HELP_func(const char *);
+void HELP_func(const char *); // implementation requires cmd_list, see below
+static int echo_on = 1;
 
-static const char pstr_ECHO[] PROGMEM = "ECHO";
-void ECHO_func(const char *args)
-{
-    Serial.printf_P(PSTR("echo = %s\n"), args);
-}
-
-cmd_t cmd_list[] = {
+Command cmd_list[] = {
     //command-function pairs
-    {pstr_IDN, strlen_P(pstr_IDN), IDN_func},    //
-                                                 //    {pstr_RST, strlen_P(pstr_RST), RST_func},                      //
-    {pstr_HELP, strlen_P(pstr_HELP), HELP_func}, //
-                                                 //    {pstr_STA_SSID, strlen_P(pstr_STA_SSID), STA_SSID_func},       //
-                                                 //    {pstr_SCAN, strlen_P(pstr_SCAN), SCAN_func},                   //
-                                                 //    {pstr_STA_PSK, strlen_P(pstr_STA_PSK), STA_PSK_func},          //
-                                                 //    {pstr_CONNECT, strlen_P(pstr_CONNECT), CONNECT_func},          //
-                                                 //    {pstr_DISCONNECT, strlen_P(pstr_DISCONNECT), DISCONNECT_func}, //
-                                                 //    {pstr_DIAG, strlen_P(pstr_DIAG), DIAG_func},                   //
-    {pstr_ECHO, strlen_P(pstr_ECHO), ECHO_func}, //
-                                                 //    {pstr_SEND, strlen_P(pstr_SEND), SEND_func},                   //
-                                                 //    {pstr_NTP, strlen_P(pstr_NTP), NTP_func},                      //
-                                                 //    {pstr_FACTORY, strlen_P(pstr_FACTORY), FACTORY_func},          //
-                                                 //    {pstr_LOAD, strlen_P(pstr_LOAD), LOAD_func},                   //
-                                                 //    {pstr_SAVE, strlen_P(pstr_SAVE), SAVE_func},                   //
-                                                 //    {pstr_ACCESS_KEY, strlen_P(pstr_ACCESS_KEY), ACCESS_KEY_func}, //
-    {NULL, 0, ERROR_func}                        //
+    Command("*IDN?", [](const char *a) {
+        Serial.printf("uuid = %s\n", NG_uuid);
+    }),
+    Command("ECHO", [](const char *a) {
+        if (*a == '1')
+            echo_on = 1;
+        else
+            echo_on = 0;
+        Serial.printf("echo = %d\n", echo_on);
+    }),
+    Command("*RST", [](const char *a) {
+        Serial.println("waiting for WDT ...");
+        while (true)
+            ;
+    }),
+    Command("HELP", HELP_func),     //
+    Command("", [](const char *a) { // empty string must be last!
+        Serial.printf_P("ERROR: UNKNOWN COMMAND %s\n", a);
+    }) // empty string must be last!
 };
 
 void HELP_func(const char *args)
 {
     Serial.println(F("Available commands:"));
-    cmd_t *cl = cmd_list;
-    for (; cl->cmd; cl++)
+    Command *cl = cmd_list;
+    for (; cl->cmd_len; cl++)
     {
         Serial.printf_P("%s\n", cl->cmd);
     }
@@ -80,9 +63,11 @@ void parse(char *cmd_line, int cmd_line_len)
             strncpy(prev_cmd_line, cmd_line, cmd_line_len);
             prev_line_len = cmd_line_len;
         }
-        cmd_t *cl = cmd_list;
+        //        cmd_t *cl = cmd_list;
+        Command *cl = cmd_list;
         int cmd_num = 0;
-        for (; cl->cmd; cl++)
+        //        for (; cl->cmd; cl++)
+        for (; cl->cmd_len; cl++)
         { // search for known commands
             if (0 == strncasecmp_P(cmd_line, cl->cmd, cl->cmd_len))
             { // known command found
@@ -102,7 +87,6 @@ void parse(char *cmd_line, int cmd_line_len)
         Serial.println(F("Empty line"));
 }
 
-static bool echo_on = true;
 void task_addChar(char ch)
 {
     static char cmd_line[MAX_CMD_LEN + 1]; // buffer
@@ -120,6 +104,8 @@ void task_addChar(char ch)
 
     if (ch == 0)
     {
+        if (echo_on)
+            Serial.println();
         parse(cmd_line, n - 1);
         n = 0;
     }
