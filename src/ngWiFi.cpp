@@ -1,13 +1,13 @@
 #include "ngWiFi.h"
 #include "NGclock.h"
-#include <ESP8266WiFi.h>
-#include "NG_WebServer.h"
+
+//#include "NG_WebServer.h"
 
 NG_WiFi::NG_WiFi(/* args */) : refresh_period_usec(ngclk.one_million)
 {
     station_status = -1; // indicate that wifi_station_get_connect_status() was not executed
     // station_status_t is an enum in range 0..5
-
+    n_scanNetworksFound = 0;
     prev_usec = 0;
 }
 
@@ -22,6 +22,7 @@ int NG_WiFi::exec(const uint32 &new_u)
     {
         prev_usec += refresh_period_usec;
         station_status_t new_station_status = wifi_station_get_connect_status();
+
         if (station_status != new_station_status)
         {
             station_status = new_station_status;
@@ -55,4 +56,48 @@ int NG_WiFi::exec(const uint32 &new_u)
     }
     return 0;
 }
+
+int8_t NG_WiFi::scan(void)
+{
+    n_scanNetworksFound = WiFi.scanNetworks();
+    return n_scanNetworksFound;
+}
+
+ssid_result NG_WiFi::set_STA_SSID(const char *new_ssid)
+{
+    const size_t new_ssid_len = strlen(new_ssid);
+    if (new_ssid_len > SSID_MAX_LEN)
+    {
+        return SSID_TOO_LONG;
+    }
+    if (new_ssid_len < 1)
+    {
+        return SSID_TOO_SHORT;
+    }
+    memcpy(sta_ssid, new_ssid, new_ssid_len);
+    sta_ssid[new_ssid_len] = 0;
+    return SSID_OK;
+}
+
+psk_pass_result NG_WiFi::set_STA_PSK(const char *new_pass)
+{
+    const size_t new_pass_len = strlen(new_pass);
+    if (new_pass_len > PSK_PASS_MAX_LEN)
+    {
+        return PSK_PASS_TOO_LONG;
+    }
+    if (new_pass_len < PSK_PASS_MIN_LEN)
+    {
+        return PSK_PASS_TOO_SHORT;
+    }
+    memcpy(sta_psk, new_pass, new_pass_len);
+    sta_psk[new_pass_len] = 0;
+    return PSK_PASS_OK;
+}
+void NG_WiFi::STA_connect(void)
+{
+    WiFi.disconnect();
+    WiFi.begin(sta_ssid, sta_psk);
+}
+
 NG_WiFi ng_WiFi;

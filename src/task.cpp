@@ -1,12 +1,21 @@
 #include "task.h"
 #include "Niagara2_generated.h"
+#include "ngWiFi.h"
+#include "ESP8266WiFiType.h"
 
 Command::Command(const char *cmd_str, void (*ptr_func)(const char *)) //
     : cmd(cmd_str),
       cmd_len(strlen_P(cmd_str)),
       func(ptr_func)
-{
+{ // Regular constructor for command-function pairs
 }
+
+Command::Command(void (*ptr_func)(const char *)) //
+    : cmd(nullptr),
+      cmd_len(0),
+      func(ptr_func)
+{ // Special constructor for handling unknown commands
+} // This error function must be the last one last in the cmd_list!
 
 void HELP_func(const char *); // implementation requires cmd_list, see below
 static int echo_on = 1;
@@ -14,60 +23,99 @@ static int echo_on = 1;
 Command cmd_list[] = {
     //command-function pairs
     Command("*IDN?", [](const char *a) {
-        Serial.printf("uuid = %s\n", NG_uuid);
+        Serial.printf("%s %s %s" EOL, NG_model, NG_version, NG_uuid);
     }),
+
     Command("ECHO", [](const char *a) {
         if (*a == '1')
             echo_on = 1;
         else
             echo_on = 0;
-        Serial.printf("echo = %d\n", echo_on);
+        Serial.printf("echo = %d" EOL, echo_on);
     }),
+
     Command("*RST", [](const char *a) {
         Serial.println("waiting for WDT ...");
         while (true)
             ;
     }),
-    Command("HELP", HELP_func),     //
-    Command("", [](const char *a) { // empty string must be last!
-        Serial.printf_P("ERROR: UNKNOWN COMMAND %s\n", a);
-    }) // empty string must be last!
-};
+
+    Command("SCAN", [](const char *a) {
+        int8_t n_NetworksFound = ng_WiFi.scan();
+        if (n_NetworksFound == WIFI_SCAN_RUNNING)
+        {
+            Serial.println("WIFI_SCAN_RUNNING");
+            return;
+        }
+        if (n_NetworksFound == WIFI_SCAN_FAILED)
+        {
+            Serial.println("WIFI_SCAN_FAILED");
+            return;
+        }
+        if (n_NetworksFound)
+        {
+            for (int i = 0; i < n_NetworksFound; i++)
+                Serial.printf("%s %d" EOL, WiFi.SSID(i).c_str(), WiFi.RSSI(i));
+        }
+        else
+            Serial.println("no access points found");
+        WiFi.scanDelete();
+    }),
+
+    Command("STA-SSID", [](const char *a) {
+        switch (ng_WiFi.set_STA_SSID(a))
+        {
+        case SSID_TOO_LONG:
+            Serial.println("SSID_TOO_LONG");
+            break;
+        case SSID_TOO_SHORT:
+            Serial.println("SSID_TOO_SHORT");
+            break;
+        case SSID_OK:
+            Serial.printf("sta-ssid = %s" EOL, ng_WiFi.get_STA_SSID());
+        }
+    }),
+
+    Command("STA-PSK", [](const char *a) {
+        switch (ng_WiFi.set_STA_PSK(a))
+        {
+        case PSK_PASS_TOO_LONG:
+            Serial.println("PSK_PASS_TOO_LONG");
+            break;
+        case PSK_PASS_TOO_SHORT:
+            Serial.println("PSK_PASS_TOO_SHORT");
+            break;
+        case PSK_PASS_OK:
+            Serial.printf("sta_psk = %s" EOL, ng_WiFi.get_STA_PSK());
+        }
+    }),
+
+    Command("CONNECT", [](const char *a) {
+        ng_WiFi.STA_connect();
+    }),
+
+
+    Command("HELP", HELP_func), //
+    Command([](const char *a) { // error function must be last!
+        Serial.printf("ERROR: UNKNOWN COMMAND %s" EOL, a);
+    })};
 
 void HELP_func(const char *args)
 {
     Serial.println(F("Available commands:"));
-    Command *cl = cmd_list;
-    for (; cl->cmd_len; cl++)
+    for (Command *cl = cmd_list; cl->cmd; cl++)
     {
-        Serial.printf_P("%s\n", cl->cmd);
+        Serial.println(cl->cmd);
     }
 }
 
 void parse(char *cmd_line, int cmd_line_len)
 {
-    static char prev_cmd_line[MAX_CMD_LEN + 1] = {'h', 'e', 'l', 'p'};
-    static int prev_line_len = 4;
-    bool is_new_cmd = true;
-    static const char pstr_up_arrow[] PROGMEM = {195, 160, 72, 0};
-    if (0 == strncmp_P(cmd_line, pstr_up_arrow, 4))
-    {
-        is_new_cmd = false;
-        cmd_line = prev_cmd_line;
-        cmd_line_len = prev_line_len;
-    }
     if (cmd_line_len)
     {
-        if (is_new_cmd)
-        {
-            strncpy(prev_cmd_line, cmd_line, cmd_line_len);
-            prev_line_len = cmd_line_len;
-        }
-        //        cmd_t *cl = cmd_list;
         Command *cl = cmd_list;
         int cmd_num = 0;
-        //        for (; cl->cmd; cl++)
-        for (; cl->cmd_len; cl++)
+        for (; cl->cmd; cl++)
         { // search for known commands
             if (0 == strncasecmp_P(cmd_line, cl->cmd, cl->cmd_len))
             { // known command found
@@ -81,7 +129,7 @@ void parse(char *cmd_line, int cmd_line_len)
             }
             cmd_num++;
         }
-        cl->func(&cmd_line[cl->cmd_len]); // this will call cmd_list -> ERROR_func
+        cl->func(cmd_line); // this will call cmd_list -> ERROR_func
     }
     else
         Serial.println(F("Empty line"));
