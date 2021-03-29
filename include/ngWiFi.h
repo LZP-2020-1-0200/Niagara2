@@ -40,9 +40,10 @@ public:
     bool got_ip(void) const { return station_status == STATION_GOT_IP; }
     int8_t scan(void);
     ssid_result set_STA_SSID(const char *);
-    const char *get_STA_SSID() const { return sta_ssid; };
+    //const char *get_STA_SSID() const { return sta_ssid; };
     psk_pass_result set_STA_PSK(const char *);
     const char *get_STA_PSK() const { return sta_psk; };
+    void print_sta_ssid(void);
     void STA_connect(void);
 };
 extern NG_WiFi ng_WiFi;

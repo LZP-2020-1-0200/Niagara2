@@ -1,7 +1,6 @@
 #include "ngWiFi.h"
 #include "NGclock.h"
-
-//#include "NG_WebServer.h"
+#include "rom_strings.h"
 
 NG_WiFi::NG_WiFi(/* args */) : refresh_period_usec(ngclk.one_million)
 {
@@ -9,6 +8,21 @@ NG_WiFi::NG_WiFi(/* args */) : refresh_period_usec(ngclk.one_million)
     // station_status_t is an enum in range 0..5
     n_scanNetworksFound = 0;
     prev_usec = 0;
+
+    //load existing station config
+    struct station_config sta_conf;
+    wifi_station_get_config(&sta_conf);
+
+    if (sizeof(sta_conf.ssid) == SSID_MAX_LEN)
+    {
+        memcpy(sta_ssid, sta_conf.ssid, SSID_MAX_LEN);
+        sta_ssid[SSID_MAX_LEN] = 0;
+    }
+    if (sizeof(sta_conf.password) == PSK_PASS_MAX_LEN)
+    {
+        memcpy(sta_psk, sta_conf.password, PSK_PASS_MAX_LEN);
+        sta_psk[PSK_PASS_MAX_LEN] = 0;
+    }
 }
 
 NG_WiFi::~NG_WiFi()
@@ -77,6 +91,11 @@ ssid_result NG_WiFi::set_STA_SSID(const char *new_ssid)
     memcpy(sta_ssid, new_ssid, new_ssid_len);
     sta_ssid[new_ssid_len] = 0;
     return SSID_OK;
+}
+
+void NG_WiFi::print_sta_ssid(void)
+{
+    Serial.printf_P(PSTR("sta-ssid = %s" EOL), sta_ssid);
 }
 
 psk_pass_result NG_WiFi::set_STA_PSK(const char *new_pass)

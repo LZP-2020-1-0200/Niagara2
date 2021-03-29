@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 #define MAX_CMD_LEN 80
-#define EOL "\r\n"
+
 void task_addChar(char ch);
 
 class Command

@@ -17,7 +17,7 @@ void NG_WebServer_init(void)
     server.onNotFound([]() { // If the client requests any URI
                              //  server.send(200, "text/plain", "this works as well");
         //     if (!handleFileRead(server.uri()))                    // send it if it exists
-        server.send(404, text_plain, "404: Not Found"); // otherwise, respond with a 404 (Not Found) error
+        server.send(404, text_plain , "404: Not Found"); // otherwise, respond with a 404 (Not Found) error
         Serial.println(F("404: Not Found"));
 
     });

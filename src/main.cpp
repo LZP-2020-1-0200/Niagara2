@@ -8,7 +8,6 @@
 #include "settings.h"
 
 #include <WiFiUdp.h>
-//#include <NTPClient.h>
 #include <ESP8266WiFi.h>
 #include "ngWiFi.h"
 #include "NG_WebServer.h"
@@ -17,6 +16,7 @@
 void setup()
 {
   settings.load();
+  ng_WiFi.print_sta_ssid();
   NG_WebServer_init();
 }
 
@@ -43,7 +43,6 @@ void loop()
     task_addChar(Serial.read());
     return;
   }
-
 
   if (ng_WiFi.got_ip())
     server.handleClient();

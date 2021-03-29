@@ -2,6 +2,7 @@
 #include "Niagara2_generated.h"
 #include "ngWiFi.h"
 #include "ESP8266WiFiType.h"
+#include "rom_strings.h"
 
 Command::Command(const char *cmd_str, void (*ptr_func)(const char *)) //
     : cmd(cmd_str),
@@ -20,49 +21,63 @@ Command::Command(void (*ptr_func)(const char *)) //
 void HELP_func(const char *); // implementation requires cmd_list, see below
 static int echo_on = 1;
 
+static const char IDN_cmd[] PROGMEM = "*IDN?";
+static const char ECHO_cmd[] PROGMEM = "ECHO";
+static const char RST_cmd[] PROGMEM = "*RST";
+static const char SCAN_cmd[] PROGMEM = "SCAN";
+static const char STA_SSID_cmd[] PROGMEM ="STA-SSID";
+
+static const char IDN_format[] PROGMEM = "%s %s %s" EOL;
+static const char ECHO_format[] PROGMEM = "echo = %d" EOL;
+static const char romstr_waiting_for_WDT[] PROGMEM = "Waiting for watchdog timer ..." EOL;
+static const char wifi_scan_running[] PROGMEM = "wifi scan running" EOL;
+static const char wifi_scan_failed[] PROGMEM = "wifi scan failed" EOL;
+static const char scan_result_format[] PROGMEM = "ssid = %s\trssi = %d dBm" EOL;
+static const char no_access_points_found[] PROGMEM = "no access points found" EOL;
+
 Command cmd_list[] = {
     //command-function pairs
-    Command("*IDN?", [](const char *a) {
-        Serial.printf("%s %s %s" EOL, NG_model, NG_version, NG_uuid);
+    Command(IDN_cmd, [](const char *a) {
+        Serial.printf_P(IDN_format, NG_model, NG_version, NG_uuid);
     }),
 
-    Command("ECHO", [](const char *a) {
+    Command(ECHO_cmd, [](const char *a) {
         if (*a == '1')
             echo_on = 1;
         else
             echo_on = 0;
-        Serial.printf("echo = %d" EOL, echo_on);
+        Serial.printf_P(ECHO_format, echo_on);
     }),
 
-    Command("*RST", [](const char *a) {
-        Serial.println("waiting for WDT ...");
+    Command(RST_cmd, [](const char *a) {
+        Serial.printf_P(romstr_waiting_for_WDT);
         while (true)
             ;
     }),
 
-    Command("SCAN", [](const char *a) {
+    Command(SCAN_cmd, [](const char *a) {
         int8_t n_NetworksFound = ng_WiFi.scan();
         if (n_NetworksFound == WIFI_SCAN_RUNNING)
         {
-            Serial.println("WIFI_SCAN_RUNNING");
+            Serial.printf_P(wifi_scan_running);
             return;
         }
         if (n_NetworksFound == WIFI_SCAN_FAILED)
         {
-            Serial.println("WIFI_SCAN_FAILED");
+            Serial.printf_P(wifi_scan_failed);
             return;
         }
         if (n_NetworksFound)
         {
             for (int i = 0; i < n_NetworksFound; i++)
-                Serial.printf("%s %d" EOL, WiFi.SSID(i).c_str(), WiFi.RSSI(i));
+                Serial.printf_P(scan_result_format, WiFi.SSID(i).c_str(), WiFi.RSSI(i));
         }
         else
-            Serial.println("no access points found");
+            Serial.printf_P(no_access_points_found);
         WiFi.scanDelete();
     }),
 
-    Command("STA-SSID", [](const char *a) {
+    Command(STA_SSID_cmd, [](const char *a) {
         switch (ng_WiFi.set_STA_SSID(a))
         {
         case SSID_TOO_LONG:
@@ -72,7 +87,7 @@ Command cmd_list[] = {
             Serial.println("SSID_TOO_SHORT");
             break;
         case SSID_OK:
-            Serial.printf("sta-ssid = %s" EOL, ng_WiFi.get_STA_SSID());
+            ng_WiFi.print_sta_ssid();
         }
     }),
 
@@ -86,7 +101,7 @@ Command cmd_list[] = {
             Serial.println("PSK_PASS_TOO_SHORT");
             break;
         case PSK_PASS_OK:
-            Serial.printf("sta_psk = %s" EOL, ng_WiFi.get_STA_PSK());
+            Serial.printf_P("sta_psk = %s" EOL, ng_WiFi.get_STA_PSK());
         }
     }),
 
@@ -94,10 +109,9 @@ Command cmd_list[] = {
         ng_WiFi.STA_connect();
     }),
 
-
     Command("HELP", HELP_func), //
     Command([](const char *a) { // error function must be last!
-        Serial.printf("ERROR: UNKNOWN COMMAND %s" EOL, a);
+        Serial.printf_P("ERROR: UNKNOWN COMMAND %s" EOL, a);
     })};
 
 void HELP_func(const char *args)
