@@ -12,7 +12,7 @@
 #include "ngWiFi.h"
 #include "NG_WebServer.h"
 #include "task.h"
-
+#include "stepper.h"
 void setup()
 {
   settings.load();
@@ -29,6 +29,13 @@ void loop()
   {
     return;
   }
+
+  if (stepper.exec(new_usec))
+  {
+//    Serial.println(stepper.get_position());
+    return;
+  }
+
   if (blink.exec(new_usec, new_secs))
   {
     //Serial.println(new_usec);
