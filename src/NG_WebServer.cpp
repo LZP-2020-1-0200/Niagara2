@@ -4,9 +4,23 @@
 
 ESP8266WebServer server(80);
 
-ROM_Str 
-
 const char *text_plain = "text/plain";
+
+//path_index_html
+
+void handle_form_data(const int &args_count,const String &path_s)
+{
+    const char *path = path_s.c_str();
+    Serial.print("args_count = ");
+    Serial.println(args_count);
+    if (path_index_html.equals(path))
+    {
+ for (int arg_n = 0; arg_n < args_count; arg_n++)
+        {
+            
+        }
+    }
+}
 
 bool handleFileRead(String path)
 { // send the right file to the client (if it exists)
@@ -17,6 +31,12 @@ bool handleFileRead(String path)
 
     String contentType = mime::getContentType(path);
     Serial.println(contentType);
+
+    const int server_args_n = server.args();
+    if (server_args_n)
+    {
+        handle_form_data(server_args_n,path);
+    }
 
     if (LittleFS.exists(path))
     {                                                       // If the file exists
