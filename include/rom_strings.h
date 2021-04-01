@@ -19,4 +19,6 @@ public:
     ~ROM_Str(){};
 };
 
+extern ROM_Str INDEX_HTML_path;
+
 #endif /* !NIAGARA2_ROM_STRINGS_H */

@@ -16,6 +16,7 @@ public:
 
 };
 
+
 extern Settings settings;
 
 #endif /* !NIAGARA2_SETTINGS_H */
