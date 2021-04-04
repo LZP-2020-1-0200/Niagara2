@@ -15,5 +15,6 @@ public:
 };
 
 extern RW_buffer tmp;
+extern RW_buffer json_buf;
 
 #endif /* !NIAGARA2_BUFFERS_H */

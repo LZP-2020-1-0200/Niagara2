@@ -13,3 +13,4 @@ RW_buffer::~RW_buffer()
 }
 
 RW_buffer tmp(80);
+RW_buffer json_buf(1000);

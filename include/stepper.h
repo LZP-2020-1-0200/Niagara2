@@ -15,7 +15,8 @@ enum stepper_direction_t
 #define STEPPER_LINE3 12
 #define STEPPER_LINE4 14
 
-
+#define MIN_STEP_DELAY_USEC 1000
+#define MAX_STEP_DELAY_USEC 10000000
 class Stepper
 {
 private:
@@ -30,6 +31,8 @@ public:
     ~Stepper(){};
     int exec(const uint32 &);
     int get_position(void) const { return position; }
+    uint32 get_step_delay_usec(void) const { return step_delay_usec; }
+    void set_step_delay_usec(const uint32 &usec);
 };
 
 extern Stepper stepper;

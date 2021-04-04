@@ -38,3 +38,20 @@ int Stepper::exec(const uint32 &new_usec)
 
     return direction;
 }
+
+void Stepper::set_step_delay_usec(const uint32 &usec)
+{
+    step_delay_usec = usec;
+    if (step_delay_usec < MIN_STEP_DELAY_USEC)
+    {
+        step_delay_usec = MIN_STEP_DELAY_USEC;
+        Serial.println(F("MIN_STEP_DELAY_USEC"));
+    }
+    if (step_delay_usec > MAX_STEP_DELAY_USEC)
+    {
+        step_delay_usec = MAX_STEP_DELAY_USEC;
+        Serial.println(F("MAX_STEP_DELAY_USEC"));
+    }
+    Serial.print(F("step_delay_usec = "));
+    Serial.println(step_delay_usec);
+}

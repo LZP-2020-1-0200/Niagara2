@@ -1,6 +1,8 @@
 #include "NG_WebServer.h"
 #include "LittleFS.h"
 #include "rom_strings.h"
+#include "ng_parameters.h"
+#include "buffers.h"
 
 ESP8266WebServer server(80);
 
@@ -13,17 +15,24 @@ void handle_form_data(const int &args_count, const String &path_s)
     const char *path = path_s.c_str();
     Serial.print("args_count = ");
     Serial.println(args_count);
-    NG_param
-    if (INDEX_HTML_path.equals(path))
+
+    for (int arg_n = 0; arg_n < args_count; arg_n++)
     {
-        for (int arg_n = 0; arg_n < args_count; arg_n++)
+        const char *argName = server.argName(arg_n).c_str();
+        Serial.print(F("argName = "));
+        Serial.println(argName);
+
+        const char *val = server.arg(arg_n).c_str();
+        Serial.print(F("arg = "));
+        Serial.println(val);
+
+        for (NG_param *ngp = ngp_table; ngp->path; ngp++)
         {
-            Serial.print(F("argName = "));
-            Serial.println(server.argName(arg_n));
-
-            Serial.print(F("arg = "));
-            Serial.println(server.arg(arg_n));
-
+            if (ngp->path->equals(path) && ngp->formfield->equals(argName))
+            {
+                Serial.println("###############atrasts");
+                ngp->set(val);
+            }
         }
     }
 }
@@ -38,23 +47,44 @@ bool handleFileRead(String path)
     String contentType = mime::getContentType(path);
     Serial.println(contentType);
 
-    const int server_args_n = server.args();
-    if (server_args_n)
-    {
-        handle_form_data(server_args_n, path);
-    }
+    if (path.endsWith(F(".json")))
+    { //deliver json
+        const char *js_path = path.c_str();
 
-    if (LittleFS.exists(path))
-    {                                                       // If the file exists
-        File file = LittleFS.open(path, "r");               // Open it
-        size_t sent = server.streamFile(file, contentType); // And send it to the client
-        Serial.print(F("Sent "));
-        Serial.println(sent);
-        file.close(); // Then close the file again
-        return true;
+        
+        //StaticJsonDocument<export_capacity> doc;
+        //DynamicJsonDocument doc(1000);
+
+        bool json_found = params_export(js_path, json_buf);
+  
+        if (json_found)
+        {
+            //serializeJson(doc, json_buf.buf(), json_buf.len);
+            server.send(200, contentType, json_buf.buf());
+        }
+
+        return json_found;
     }
-    Serial.println(F("\tFile Not Found"));
-    return false; // If the file doesn't exist, return false
+    else
+    { //deliver file
+        const int server_args_n = server.args();
+        if (server_args_n)
+        {
+            handle_form_data(server_args_n, path);
+        }
+
+        if (LittleFS.exists(path))
+        {                                                       // If the file exists
+            File file = LittleFS.open(path, "r");               // Open it
+            size_t sent = server.streamFile(file, contentType); // And send it to the client
+            Serial.print(F("Sent "));
+            Serial.println(sent);
+            file.close(); // Then close the file again
+            return true;
+        }
+        Serial.println(F("\tFile Not Found"));
+        return false; // If the file doesn't exist, return false
+    }
 }
 
 void NG_WebServer_init(void)

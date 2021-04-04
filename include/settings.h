@@ -9,6 +9,7 @@ class Settings
 {
 private:
     /* data */
+    
 public:
     Settings(/* args */);
     ~Settings();

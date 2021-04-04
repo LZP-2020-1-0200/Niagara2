@@ -1,8 +1,8 @@
 {
-    "NG_XOR_Mask": "24211dc18a7efb734a177e2ef9ad3b56b65eff61a4574187737a92bbe1ba0b9f809fa7f70e9e73e5d60c3407b45d7b67a4edaeeb5c5be34fe1af6fc40fdb32a4",
-    "NG_uuid": "2e7ac0ff-02f9-4e02-9f8c-c931118dfdbe",
+    "NG_XOR_Mask": "0086d4d4199ad047060716dea007af9c61d326d49eeef2ccac56ca66f6c910a2abe4b5832d1e841914da39c35332bbbef0850ce2219fce36f25609c4127f1b08",
+    "NG_uuid": "177313f2-ccdc-40d8-a0b8-6dc8ff79c94b",
     "model": "Niagara",
-    "secret1": "U6SMCJHn2SWgwJBRKvyX",
+    "secret1": "WjzHI0FB7L8BHy8DPPpi",
     "stage": "testing",
     "version": "0.5"
 }
