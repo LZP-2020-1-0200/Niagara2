@@ -26,9 +26,9 @@ void handle_form_data(const int &args_count, const String &path_s)
         Serial.print(F("arg = "));
         Serial.println(val);
 
-        for (NG_param *ngp = ngp_table; ngp->path; ngp++)
+        for (NG_param *ngp = ngp_table; ngp->html_path; ngp++)
         {
-            if (ngp->path->equals(path) && ngp->formfield->equals(argName))
+            if (ngp->html_path->equals(path) && ngp->field->equals(argName))
             {
                 Serial.println("###############atrasts");
                 ngp->set(val);

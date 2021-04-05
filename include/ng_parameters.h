@@ -11,16 +11,18 @@ class NG_param
 private:
     /* data */
 public:
-    NG_param(ROM_Str *html_path,              //
-             ROM_Str *field,                  //
-             ROM_Str *json_file,              //
-             void (*set_func)(const char *),  //
-             void (*get_func)(JsonDocument &) //
+    NG_param(ROM_Str *_html_path,              //
+             ROM_Str *_field,                  //
+             ROM_Str *_json_file,              //
+             ROM_Str *_config_filename,        //
+             void (*_set_func)(const char *),  //
+             void (*_get_func)(JsonDocument &) //
     );
     ~NG_param();
-    const ROM_Str *path;
-    const ROM_Str *formfield;
+    const ROM_Str *html_path;
+    const ROM_Str *field;
     const ROM_Str *json_filename;
+    const ROM_Str *config_filename;
     void (*set)(const char *);
     void (*get)(JsonDocument &);
 };

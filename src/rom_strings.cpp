@@ -16,6 +16,9 @@ ROM_Str STEP_DELAY_USEC_formfield = ROM_Str(STEP_DELAY_USEC_FORMFIELD);
 static const char STEPPER_JSON_PATH[] PROGMEM = "/stepper.json";
 ROM_Str STEPPER_JSON_path = ROM_Str(STEPPER_JSON_PATH);
 
+static const char CONFIG_JSON_PATH[] PROGMEM = "/config.json";
+ROM_Str CONFIG_JSON_path = ROM_Str(CONFIG_JSON_PATH);
+
 static const char STEPPER_POSITION_EXPORT[] PROGMEM = "stepper_position";
 ROM_Str STEPPER_POSITION_export = ROM_Str(STEPPER_POSITION_EXPORT);
 

@@ -23,5 +23,6 @@ extern ROM_Str STEPPER_HTML_path;
 extern ROM_Str STEP_DELAY_USEC_formfield;
 extern ROM_Str STEPPER_JSON_path;
 extern ROM_Str STEPPER_POSITION_export;
+extern ROM_Str CONFIG_JSON_path;
 
 #endif /* !NIAGARA2_ROM_STRINGS_H */
