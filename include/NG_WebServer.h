@@ -6,5 +6,4 @@
 extern ESP8266WebServer server;
 void NG_WebServer_init(void);
 
-
 #endif /* !NIAGARA2_WEBSERVER_H */

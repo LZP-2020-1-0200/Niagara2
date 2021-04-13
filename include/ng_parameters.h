@@ -28,6 +28,5 @@ public:
 };
 
 extern NG_param ngp_table[];
-//bool param_json_export(char *buffer, const size_t &bufferSize, const char *json_file);
 
 #endif /* NIAGARA2_NG_PARAMETERS_H */

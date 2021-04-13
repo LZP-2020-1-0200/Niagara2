@@ -9,14 +9,12 @@ class Settings
 {
 private:
     /* data */
-    
+
 public:
     Settings(/* args */);
     ~Settings();
     void load(void);
-
 };
-
 
 extern Settings settings;
 

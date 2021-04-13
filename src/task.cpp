@@ -1,5 +1,4 @@
 #include "task.h"
-#include "Niagara2_generated.h"
 #include "ngWiFi.h"
 #include "ESP8266WiFiType.h"
 #include "rom_strings.h"
@@ -21,11 +20,15 @@ Command::Command(void (*ptr_func)(const char *)) //
 void HELP_func(const char *); // implementation requires cmd_list, see below
 static int echo_on = 1;
 
+// keep all strings in PROGMEM
 static const char IDN_cmd[] PROGMEM = "*IDN?";
 static const char ECHO_cmd[] PROGMEM = "ECHO";
 static const char RST_cmd[] PROGMEM = "*RST";
 static const char SCAN_cmd[] PROGMEM = "SCAN";
-static const char STA_SSID_cmd[] PROGMEM ="STA-SSID";
+static const char STA_SSID_cmd[] PROGMEM = "STA-SSID";
+static const char STA_PSK_cmd[] PROGMEM = "STA-PSK";
+static const char CONNECT_cmd[] PROGMEM = "CONNECT";
+static const char HELP_cmd[] PROGMEM = "HELP";
 
 static const char IDN_format[] PROGMEM = "%s %s %s" EOL;
 static const char ECHO_format[] PROGMEM = "echo = %d" EOL;
@@ -33,12 +36,19 @@ static const char romstr_waiting_for_WDT[] PROGMEM = "Waiting for watchdog timer
 static const char wifi_scan_running[] PROGMEM = "wifi scan running" EOL;
 static const char wifi_scan_failed[] PROGMEM = "wifi scan failed" EOL;
 static const char scan_result_format[] PROGMEM = "ssid = %s\trssi = %d dBm" EOL;
+static const char sta_psk_format[] PROGMEM = "sta_psk = %s" EOL;
+static const char err_unknown_cmd_format[] PROGMEM = "ERROR: UNKNOWN COMMAND %s" EOL;
+
 static const char no_access_points_found[] PROGMEM = "no access points found" EOL;
+static const char ssid_too_long[] PROGMEM = "SSID_TOO_LONG" EOL;
+static const char ssid_too_short[] PROGMEM = "SSID_TOO_SHORT" EOL;
+static const char psk_pass_too_long[] PROGMEM = "PSK_PASS_TOO_LONG" EOL;
+static const char psk_pass_too_short[] PROGMEM = "PSK_PASS_TOO_SHORT" EOL;
 
 Command cmd_list[] = {
     //command-function pairs
     Command(IDN_cmd, [](const char *a) {
-        Serial.printf_P(IDN_format, NG_model, NG_version, NG_uuid);
+        Serial.printf_P(IDN_format, NG_model.str, NG_version.str, NG_uuid.str);
     }),
 
     Command(ECHO_cmd, [](const char *a) {
@@ -52,7 +62,7 @@ Command cmd_list[] = {
     Command(RST_cmd, [](const char *a) {
         Serial.printf_P(romstr_waiting_for_WDT);
         while (true)
-            ;
+            ; // wait for watchdog timer
     }),
 
     Command(SCAN_cmd, [](const char *a) {
@@ -81,37 +91,37 @@ Command cmd_list[] = {
         switch (ng_WiFi.set_STA_SSID(a))
         {
         case SSID_TOO_LONG:
-            Serial.println("SSID_TOO_LONG");
+            Serial.printf_P(ssid_too_long);
             break;
         case SSID_TOO_SHORT:
-            Serial.println("SSID_TOO_SHORT");
+            Serial.printf_P(ssid_too_short);
             break;
         case SSID_OK:
             ng_WiFi.print_sta_ssid();
         }
     }),
 
-    Command("STA-PSK", [](const char *a) {
+    Command(STA_PSK_cmd, [](const char *a) {
         switch (ng_WiFi.set_STA_PSK(a))
         {
         case PSK_PASS_TOO_LONG:
-            Serial.println("PSK_PASS_TOO_LONG");
+            Serial.printf_P(psk_pass_too_long);
             break;
         case PSK_PASS_TOO_SHORT:
-            Serial.println("PSK_PASS_TOO_SHORT");
+            Serial.printf_P(psk_pass_too_short);
             break;
         case PSK_PASS_OK:
-            Serial.printf_P("sta_psk = %s" EOL, ng_WiFi.get_STA_PSK());
+            Serial.printf_P(sta_psk_format, ng_WiFi.get_STA_PSK());
         }
     }),
 
-    Command("CONNECT", [](const char *a) {
+    Command(CONNECT_cmd, [](const char *a) {
         ng_WiFi.STA_connect();
     }),
 
-    Command("HELP", HELP_func), //
-    Command([](const char *a) { // error function must be last!
-        Serial.printf_P("ERROR: UNKNOWN COMMAND %s" EOL, a);
+    Command(HELP_cmd, HELP_func), //
+    Command([](const char *a) {   // error function must be last!
+        Serial.printf_P(err_unknown_cmd_format, a);
     })};
 
 void HELP_func(const char *args)
