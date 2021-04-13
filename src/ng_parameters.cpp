@@ -51,11 +51,27 @@ NG_param ngp_table[] = {
         ),
 
     NG_param(
-        &STEPPER_HTML_path, &STEPPER_POSITION_export,
+        &PATH_none, &STEPPER_POSITION_export,
         &STEPPER_JSON_path, &PATH_none, dummy_set,
         [](JsonDocument &d) {
             // const String fi = STEPPER_POSITION_export.str;
             d[FPSTR(STEPPER_POSITION_export.str)] = stepper.get_position();
+        }),
+
+    NG_param(
+        &PATH_none, &MIN_STEP_DELAY_USEC_export,
+        &STEPPER_JSON_path, &PATH_none, dummy_set,
+        [](JsonDocument &d) {
+            // const String fi = STEPPER_POSITION_export.str;
+            d[FPSTR(MIN_STEP_DELAY_USEC_export.str)] = MIN_STEP_DELAY_USEC;
+        }),
+
+    NG_param(
+        &PATH_none, &MAX_STEP_DELAY_USEC_export,
+        &STEPPER_JSON_path, &PATH_none, dummy_set,
+        [](JsonDocument &d) {
+            // const String fi = STEPPER_POSITION_export.str;
+            d[FPSTR(MAX_STEP_DELAY_USEC_export.str)] = MAX_STEP_DELAY_USEC;
         }),
 
     NG_param(nullptr, nullptr, nullptr, nullptr, dummy_set, dummy_get) // last one is nullptr
@@ -66,14 +82,12 @@ bool params_export(const char *j_path, RW_buffer &target)
     bool path_found = false;
     const int capacity = JSON_OBJECT_SIZE(10);
     StaticJsonDocument<capacity> doc;
-    //DynamicJsonDocument doc(1000);
 
     for (NG_param *ngp = ngp_table; ngp->json_filename; ngp++)
     {
         if (ngp->json_filename->equals(j_path))
         {
             path_found = true;
-            doc["sss"] = 4;
             ngp->get(doc);
         }
     }
@@ -84,7 +98,3 @@ bool params_export(const char *j_path, RW_buffer &target)
     }
     return path_found;
 }
-//bool param_json_export(char *buffer, const size_t &bufferSize, const char *json_file)
-//{
-
-//}
