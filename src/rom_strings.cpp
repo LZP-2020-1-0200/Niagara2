@@ -18,7 +18,6 @@ ROM_Str NG_version = ROM_Str(NG_VERSION);
 /*
 ===== platformio.ini =====
 build_flags = !gen_flags.cmd
-
 ===== gen_flags.cmd =====
 @echo off
 for /f %%i in ('uuidgen.exe') do set RESULT=%%i
