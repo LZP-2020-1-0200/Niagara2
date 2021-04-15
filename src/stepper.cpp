@@ -1,5 +1,5 @@
 #include "stepper.h"
-
+#include "rom_strings.h"
 Stepper stepper;
 Stepper::Stepper(/* args */)
 {
@@ -31,10 +31,21 @@ int Stepper::exec(const uint32 &new_usec)
     static const uint8_t Q4[] = {HIGH, HIGH, LOW, LOW};
     const int phase = position & 0x3;
 
-    digitalWrite(STEPPER_LINE1, Q1[phase]);
-    digitalWrite(STEPPER_LINE2, Q2[phase]);
-    digitalWrite(STEPPER_LINE3, Q3[phase]);
-    digitalWrite(STEPPER_LINE4, Q4[phase]);
+    if (direction)
+    {
+        digitalWrite(STEPPER_LINE1, Q1[phase]);
+        digitalWrite(STEPPER_LINE2, Q2[phase]);
+        digitalWrite(STEPPER_LINE3, Q3[phase]);
+        digitalWrite(STEPPER_LINE4, Q4[phase]);
+    }
+    else
+    { // turn off all lines
+        static const uint8_t stepper_off = LOW;
+        digitalWrite(STEPPER_LINE1, stepper_off);
+        digitalWrite(STEPPER_LINE2, stepper_off);
+        digitalWrite(STEPPER_LINE3, stepper_off);
+        digitalWrite(STEPPER_LINE4, stepper_off);
+    }
 
     return direction;
 }
@@ -55,3 +66,13 @@ void Stepper::set_step_delay_usec(const uint32 &usec)
     Serial.print(F("step_delay_usec = "));
     Serial.println(step_delay_usec);
 }
+
+//void Stepper::set_direction(const char *dstr)
+//{
+//    stepper_direction_t d = STEPPER_PAUSE;
+//    if (rs_stepper_down.equals(dstr))
+//        d = STEPPER_DOWN;
+//    else if (rs_stepper_up.equals(dstr))
+//        d = STEPPER_UP;
+//    set_direction(d);
+//}

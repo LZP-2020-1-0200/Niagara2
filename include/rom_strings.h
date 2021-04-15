@@ -31,4 +31,10 @@ extern ROM_Str MIN_STEP_DELAY_USEC_export;
 extern ROM_Str MAX_STEP_DELAY_USEC_export;
 extern ROM_Str CONFIG_JSON_path;
 
+extern ROM_Str rs_stepper_direction;
+extern ROM_Str rs_stepper_down;
+extern ROM_Str rs_stepper_pause;
+extern ROM_Str rs_stepper_up;
+
+
 #endif /* !NIAGARA2_ROM_STRINGS_H */

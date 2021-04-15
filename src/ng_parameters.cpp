@@ -1,5 +1,6 @@
 #include "ng_parameters.h"
 #include "stepper.h"
+#include "buffers.h"
 
 NG_param::NG_param(ROM_Str *_html_path,              //
                    ROM_Str *_field,                  //
@@ -28,10 +29,38 @@ void dummy_set(const char *args) { return; }
 
 void get_step_delay_usec(JsonDocument &local_doc)
 {
-    //local_doc["dummy"] = 7;
-    const String field = FPSTR(STEP_DELAY_USEC_formfield.str);
+    const String field = FPSTR(rs_stepper_direction.str);
     Serial.println(field);
     local_doc[field] = stepper.get_step_delay_usec();
+}
+
+void exp_RO_str(JsonDocument &_doc, ROM_Str &_field, ROM_Str &_val)
+{
+    char *field = tmp.buf();
+    const int field_buf_len = tmp.len;
+    strncpy_P(field, _field.str, field_buf_len);
+
+    char *val = tmp2.buf();
+    const int val_buf_len = tmp2.len;
+    strncpy_P(val, _val.str, val_buf_len);
+
+    _doc[field] = val;
+}
+
+void get_stepper_direction(JsonDocument &local_doc)
+{
+    //const char * field = rs_stepper_direction.str;
+    switch (stepper.get_direction())
+    {
+    case STEPPER_DOWN:
+        exp_RO_str(local_doc, rs_stepper_direction, rs_stepper_down);
+        break;
+    case STEPPER_UP:
+        exp_RO_str(local_doc, rs_stepper_direction, rs_stepper_up);
+        break;
+    default:
+        exp_RO_str(local_doc, rs_stepper_direction, rs_stepper_pause);
+    }
 }
 
 NG_param ngp_table[] = {
@@ -70,9 +99,21 @@ NG_param ngp_table[] = {
         &PATH_none, &MAX_STEP_DELAY_USEC_export,
         &STEPPER_JSON_path, &PATH_none, dummy_set,
         [](JsonDocument &d) {
-            // const String fi = STEPPER_POSITION_export.str;
             d[FPSTR(MAX_STEP_DELAY_USEC_export.str)] = MAX_STEP_DELAY_USEC;
         }),
+
+    NG_param(
+        &STEPPER_HTML_path, &rs_stepper_direction,
+        &STEPPER_JSON_path, &PATH_none,
+        [](const char *a) {
+            stepper_direction_t d = STEPPER_PAUSE;
+            if (rs_stepper_down.equals(a))
+                d = STEPPER_DOWN;
+            else if (rs_stepper_up.equals(a))
+                d = STEPPER_UP;
+            stepper.set_direction(d);
+        },
+        get_stepper_direction),
 
     NG_param(nullptr, nullptr, nullptr, nullptr, dummy_set, dummy_get) // last one is nullptr
 };

@@ -31,6 +31,10 @@ public:
     ~Stepper(){};
     int exec(const uint32 &);
     int get_position(void) const { return position; }
+    void set_direction(stepper_direction_t &dir) { direction = dir; }
+//    void set_direction(const char *dstr);
+    stepper_direction_t get_direction(void) const { return direction; }
+
     uint32 get_step_delay_usec(void) const { return step_delay_usec; }
     void set_step_delay_usec(const uint32 &usec);
 };

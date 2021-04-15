@@ -29,7 +29,6 @@ echo -D UUID=\"%RESULT%\"
 static const char NG_UUID[] PROGMEM = UUID;
 ROM_Str NG_uuid = ROM_Str(NG_UUID);
 
-
 static const char STEPPER_HTML_PATH[] PROGMEM = "/stepper.html";
 ROM_Str STEPPER_HTML_path = ROM_Str(STEPPER_HTML_PATH);
 
@@ -50,3 +49,15 @@ ROM_Str MIN_STEP_DELAY_USEC_export = ROM_Str(MIN_STEP_DELAY_USEC_EXPORT);
 
 static const char MAX_STEP_DELAY_USEC_EXPORT[] PROGMEM = "max_step_delay_usec";
 ROM_Str MAX_STEP_DELAY_USEC_export = ROM_Str(MAX_STEP_DELAY_USEC_EXPORT);
+
+static const char STEPPER_DIRECTION[] PROGMEM = "stepper_direction";
+ROM_Str rs_stepper_direction = ROM_Str(STEPPER_DIRECTION);
+
+static const char STEPPER_DOWN_PM[] PROGMEM = "stepper_down";
+ROM_Str rs_stepper_down = ROM_Str(STEPPER_DOWN_PM);
+
+static const char STEPPER_PAUSE_PM[] PROGMEM = "stepper_pause";
+ROM_Str rs_stepper_pause = ROM_Str(STEPPER_PAUSE_PM);
+
+static const char STEPPER_UP_PM[] PROGMEM = "stepper_up";
+ROM_Str rs_stepper_up = ROM_Str(STEPPER_UP_PM);
