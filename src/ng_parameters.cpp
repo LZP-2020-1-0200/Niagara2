@@ -35,7 +35,7 @@ void get_step_delay_usec(JsonDocument &local_doc)
 }
 
 void exp_RO_str(JsonDocument &_doc, ROM_Str &_field, ROM_Str &_val)
-{
+{ // export strings from progmem to json
     char *field = tmp.buf();
     const int field_buf_len = tmp.len;
     strncpy_P(field, _field.str, field_buf_len);
@@ -44,12 +44,12 @@ void exp_RO_str(JsonDocument &_doc, ROM_Str &_field, ROM_Str &_val)
     const int val_buf_len = tmp2.len;
     strncpy_P(val, _val.str, val_buf_len);
 
-    _doc[field] = val;
+    _doc[(const char *)field] = (const char *)val;
 }
 
 void get_stepper_direction(JsonDocument &local_doc)
 {
-    //const char * field = rs_stepper_direction.str;
+    Serial.println(F("get_stepper_direction"));
     switch (stepper.get_direction())
     {
     case STEPPER_DOWN:
@@ -115,7 +115,41 @@ NG_param ngp_table[] = {
         },
         get_stepper_direction),
 
-    NG_param(nullptr, nullptr, nullptr, nullptr, dummy_set, dummy_get) // last one is nullptr
+    NG_param(&STEPPER_HTML_path,               //
+             &rs_stepper_down,                 //
+             &PATH_none,              //
+             &PATH_none,        //
+             [](const char *a){
+                 stepper_direction_t d = STEPPER_DOWN;
+                 stepper.set_direction(d);
+             },  //
+             dummy_get //
+             ),
+
+    NG_param(&STEPPER_HTML_path,               //
+             &rs_stepper_up,                 //
+             &PATH_none,              //
+             &PATH_none,        //
+             [](const char *a){
+                 stepper_direction_t d = STEPPER_UP;
+                 stepper.set_direction(d);
+             },  //
+             dummy_get //
+             ),
+
+    NG_param(&STEPPER_HTML_path,               //
+             &rs_stepper_pause,                 //
+             &PATH_none,              //
+             &PATH_none,        //
+             [](const char *a){
+                 stepper_direction_t d = STEPPER_PAUSE;
+                 stepper.set_direction(d);
+             },  //
+             dummy_get //
+             ),
+
+
+        NG_param(nullptr, nullptr, nullptr, nullptr, dummy_set, dummy_get) // last one is nullptr
 };
 
 bool params_export(const char *j_path, RW_buffer &target)
